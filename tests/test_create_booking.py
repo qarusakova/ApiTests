@@ -114,3 +114,103 @@ def test_create_booking_no_body():
 
   print("Status Code", response.status_code)
   assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR
+
+def test_create_booking_zero_totalprice(client, cleanup_booking):
+  request = {
+  "firstname": "",
+  "lastname": "Test",
+  "totalprice": 0,
+  "depositpaid": True,
+  "bookingdates": {
+    "checkin": "2026-05-01",
+    "checkout": "2026-05-05"
+    }
+  }
+  response = create_booking(client, request)
+
+  print("Status Code", response.status_code)
+  print("JSON Response ", response.json())
+
+  assert response.status_code == HTTPStatus.BAD_REQUEST
+
+  cleanup_booking.append(response.json()["bookingid"])
+
+def test_create_booking_negative_totalprice(client, cleanup_booking):
+  request = {
+  "firstname": "",
+  "lastname": "Test",
+  "totalprice": -500,
+  "depositpaid": True,
+  "bookingdates": {
+    "checkin": "2026-05-01",
+    "checkout": "2026-05-05"
+    }
+  }
+  response = create_booking(client, request)
+
+  print("Status Code", response.status_code)
+  print("JSON Response ", response.json())
+
+  assert response.status_code == HTTPStatus.BAD_REQUEST
+
+  cleanup_booking.append(response.json()["bookingid"])
+
+def test_create_booking_totalprice_overflow(client, cleanup_booking):
+  request = {
+  "firstname": "",
+  "lastname": "Test",
+  "totalprice": 99999999999999,
+  "depositpaid": True,
+  "bookingdates": {
+    "checkin": "2026-05-01",
+    "checkout": "2026-05-05"
+    }
+  }
+  response = create_booking(client, request)
+
+  print("Status Code", response.status_code)
+  print("JSON Response ", response.json())
+
+  assert response.status_code == HTTPStatus.BAD_REQUEST
+
+  cleanup_booking.append(response.json()["bookingid"])
+
+def test_create_booking_checkout_earlier_than_checkin(client, cleanup_booking):
+  request = {
+  "firstname": "",
+  "lastname": "Test",
+  "totalprice": 150,
+  "depositpaid": True,
+  "bookingdates": {
+    "checkin": "2026-05-05",
+    "checkout": "2026-05-01"
+    }
+  }
+  response = create_booking(client, request)
+
+  print("Status Code", response.status_code)
+  print("JSON Response ", response.json())
+
+  assert response.status_code == HTTPStatus.BAD_REQUEST
+
+  cleanup_booking.append(response.json()["bookingid"])
+
+def test_create_booking_checkout_dates_in_the_past(client, cleanup_booking):
+  request = {
+  "firstname": "",
+  "lastname": "Test",
+  "totalprice": 150,
+  "depositpaid": True,
+  "bookingdates": {
+    "checkin": "2020-05-01",
+    "checkout": "2020-05-05"
+    }
+  }
+  response = create_booking(client, request)
+
+  print("Status Code", response.status_code)
+  print("JSON Response ", response.json())
+
+  assert response.status_code == HTTPStatus.BAD_REQUEST
+
+  cleanup_booking.append(response.json()["bookingid"])
